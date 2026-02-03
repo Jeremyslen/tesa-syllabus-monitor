@@ -1,0 +1,962 @@
+/**
+ * TESA Syllabus Monitor
+ * Estilos Login - Diseño Card Moderno con Paisaje
+ * 
+ * @package TESASyllabusMonitor
+ * @author Sistema TESA
+ * @version 3.0
+ */
+
+/* ========================================
+   RESET Y BASE
+   ======================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+}
+
+/* ========================================
+   CONTENEDOR PRINCIPAL CON FONDO
+   ======================================== */
+
+.login-wrapper {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    padding: 20px;
+}
+
+/* Fondo de paisaje animado */
+.background-landscape {
+    position: absolute;
+    inset: 0;
+    background-image: 
+        linear-gradient(to bottom, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.5) 100%),
+        url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 600"><defs><linearGradient id="sky" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style="stop-color:%23667eea;stop-opacity:1" /><stop offset="50%" style="stop-color:%23f093fb;stop-opacity:1" /><stop offset="100%" style="stop-color:%23764ba2;stop-opacity:1" /></linearGradient></defs><rect fill="url(%23sky)" width="1200" height="600"/><circle cx="900" cy="150" r="80" fill="%23FFB347" opacity="0.9"/><ellipse cx="200" cy="450" rx="300" ry="80" fill="%234a148c" opacity="0.6"/><ellipse cx="600" cy="480" rx="400" ry="100" fill="%23311b92" opacity="0.7"/><ellipse cx="1000" cy="460" rx="350" ry="90" fill="%232d1b69" opacity="0.8"/></svg>');
+    background-size: cover;
+    background-position: center;
+    animation: landscapeMove 30s ease-in-out infinite alternate;
+    z-index: 1;
+}
+
+@keyframes landscapeMove {
+    0% { transform: scale(1) translateY(0); }
+    100% { transform: scale(1.1) translateY(-20px); }
+}
+
+/* Overlay de colores vibrantes */
+.color-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.4) 0%, 
+        rgba(118, 75, 162, 0.4) 25%,
+        rgba(240, 147, 251, 0.4) 50%,
+        rgba(79, 172, 254, 0.4) 100%);
+    background-size: 400% 400%;
+    animation: gradientShift 15s ease infinite;
+    z-index: 2;
+}
+
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Partículas flotantes */
+.particles {
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    pointer-events: none;
+}
+
+.particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    animation: particleFloat 8s ease-in-out infinite;
+}
+
+@keyframes particleFloat {
+    0%, 100% {
+        transform: translateY(0) translateX(0);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    90% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100vh) translateX(50px);
+        opacity: 0;
+    }
+}
+
+.particle:nth-child(2) { animation-delay: 2s; animation-duration: 10s; }
+.particle:nth-child(3) { animation-delay: 4s; animation-duration: 12s; }
+.particle:nth-child(4) { animation-delay: 6s; animation-duration: 9s; }
+.particle:nth-child(5) { animation-delay: 8s; animation-duration: 11s; }
+
+/* ========================================
+   TARJETA DE LOGIN (CARD) - MÁS GRANDE
+   ======================================== */
+
+.login-card {
+    position: relative;
+    z-index: 10;
+    display: flex;
+    width: 100%;
+    max-width: 1000px; /* Aumentado de 900px a 1000px */
+    min-height: 650px; /* Aumentado de 550px a 650px */
+    background: white;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 
+        0 30px 60px rgba(0, 0, 0, 0.3),
+        0 0 100px rgba(102, 126, 234, 0.2);
+    animation: cardEntrance 0.8s ease-out;
+}
+
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ========================================
+   PANEL IZQUIERDO - MÁS GRANDE Y CON MEJOR VISUALIZACIÓN
+   ======================================== */
+
+.card-left {
+    flex: 0 0 50%; /* Aumentado de 45% a 50% */
+    position: relative;
+    background-image: url('https://as1.ftcdn.net/jpg/03/89/23/56/1000_F_389235699_hbsQr04GFPweihgzq5veqQjBTYj6ghGE.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 50px; /* Aumentado el padding */
+    overflow: hidden;
+}
+
+/* Overlay semitransparente para mejorar legibilidad del texto */
+.card-left-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+        rgba(102, 126, 234, 0.75) 0%, 
+        rgba(118, 75, 162, 0.75) 50%, 
+        rgba(240, 147, 251, 0.65) 100%);
+    z-index: 1;
+}
+
+/* Contenido de bienvenida */
+.welcome-content {
+    position: relative;
+    z-index: 2;
+    color: white;
+    text-align: left;
+}
+
+/* Iconos académicos en fila */
+.academic-icons {
+    display: flex;
+    gap: 20px; /* Aumentado el gap */
+    margin-bottom: 30px; /* Aumentado el margen */
+    align-items: center;
+}
+
+.icon-item {
+    font-size: 48px; /* Aumentado de 40px a 48px */
+    display: inline-block;
+    animation: iconBounce 2s ease-in-out infinite;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
+}
+
+.icon-item:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.icon-item:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.icon-item:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes iconBounce {
+    0%, 100% { 
+        transform: translateY(0) scale(1); 
+    }
+    50% { 
+        transform: translateY(-8px) scale(1.05); 
+    }
+}
+
+.welcome-content h1 {
+    font-size: 64px; /* Aumentado de 56px a 64px */
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 25px; /* Aumentado el margen */
+    text-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    letter-spacing: -1px;
+}
+
+.welcome-text {
+    font-size: 18px; /* Aumentado de 16px a 18px */
+    line-height: 1.8;
+    opacity: 0.95;
+    margin-top: 20px; /* Aumentado el margen */
+    font-weight: 300;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+/* Puntos decorativos */
+.decorative-dots {
+    display: flex;
+    gap: 10px; /* Aumentado el gap */
+    margin-top: 35px; /* Aumentado el margen */
+}
+
+.decorative-dots span {
+    width: 12px; /* Aumentado de 10px a 12px */
+    height: 12px; /* Aumentado de 10px a 12px */
+    background: rgba(255, 255, 255, 0.6);
+    border-radius: 50%;
+    display: inline-block;
+    animation: dotPulse 1.5s ease-in-out infinite;
+}
+
+.decorative-dots span:nth-child(2) { animation-delay: 0.3s; }
+.decorative-dots span:nth-child(3) { animation-delay: 0.6s; }
+
+@keyframes dotPulse {
+    0%, 100% { opacity: 0.5; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.3); }
+}
+
+/* Decoraciones flotantes - más grandes */
+.card-decoration {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    z-index: 2;
+}
+
+.decoration-1 {
+    width: 180px; /* Aumentado de 150px a 180px */
+    height: 180px; /* Aumentado de 150px a 180px */
+    top: -60px; /* Aumentado */
+    right: -60px; /* Aumentado */
+    animation: decorationFloat1 10s ease-in-out infinite;
+}
+
+.decoration-2 {
+    width: 120px; /* Aumentado de 100px a 120px */
+    height: 120px; /* Aumentado de 100px a 120px */
+    bottom: 60px; /* Aumentado */
+    left: -40px; /* Aumentado */
+    animation: decorationFloat2 12s ease-in-out infinite;
+}
+
+.decoration-3 {
+    width: 100px; /* Aumentado de 80px a 100px */
+    height: 100px; /* Aumentado de 80px a 100px */
+    top: 50%;
+    right: 25px; /* Aumentado */
+    animation: decorationFloat3 8s ease-in-out infinite;
+}
+
+@keyframes decorationFloat1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-20px, 20px) scale(1.1); }
+}
+
+@keyframes decorationFloat2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(20px, -20px) scale(0.9); }
+}
+
+@keyframes decorationFloat3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    50% { transform: translate(-10px, 10px) scale(1.15); }
+}
+
+/* ========================================
+   PANEL DERECHO - FORMULARIO
+   ======================================== */
+
+.card-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: white;
+    padding: 60px 50px; /* Aumentado el padding */
+    position: relative;
+}
+
+.form-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.form-container h2 {
+    font-size: 38px; /* Aumentado de 36px a 38px */
+    color: #1a202c;
+    font-weight: 700;
+    margin-bottom: 40px; /* Aumentado el margen */
+}
+
+/* ========================================
+   FORMULARIO
+   ======================================== */
+
+.login-form .form-group {
+    margin-bottom: 30px; /* Aumentado de 25px a 30px */
+}
+
+.login-form label {
+    display: block;
+    margin-bottom: 12px; /* Aumentado de 10px a 12px */
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 15px; /* Aumentado de 14px a 15px */
+    letter-spacing: 0.3px;
+}
+
+.login-form .form-input {
+    width: 100%;
+    padding: 18px 20px; /* Aumentado el padding */
+    font-size: 16px; /* Aumentado de 15px a 16px */
+    border: 2px solid #e2e8f0;
+    border-radius: 12px;
+    background: #f7fafc;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.login-form .form-input:hover {
+    border-color: #cbd5e0;
+    background: white;
+}
+
+.login-form .form-input:focus {
+    outline: none;
+    border-color: #667eea;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.login-form .form-input::placeholder {
+    color: #a0aec0;
+}
+
+/* Wrapper de password */
+.password-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.password-wrapper .form-input {
+    padding-right: 50px;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    padding: 8px;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+}
+
+.toggle-password:hover {
+    background: #edf2f7;
+    transform: scale(1.1);
+}
+
+.toggle-password:active {
+    transform: scale(0.95);
+}
+
+/* ========================================
+   BOTÓN DE LOGIN
+   ======================================== */
+
+.btn-login {
+    width: 100%;
+    padding: 18px 24px; /* Aumentado el padding vertical */
+    font-size: 17px; /* Aumentado de 16px a 17px */
+    font-weight: 600;
+    color: white;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    margin-top: 15px; /* Aumentado de 10px a 15px */
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-login::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transition: left 0.6s;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, 0.4);
+}
+
+.btn-login:hover::before {
+    left: 100%;
+}
+
+.btn-login:active {
+    transform: translateY(0);
+}
+
+/* ========================================
+   FOOTER DEL FORMULARIO
+   ======================================== */
+
+.form-footer {
+    margin-top: 30px; /* Aumentado de 25px a 30px */
+    text-align: center;
+}
+
+.form-footer p {
+    color: #718096;
+    font-size: 15px; /* Aumentado de 14px a 15px */
+}
+
+.link-register {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.link-register:hover {
+    color: #764ba2;
+    text-decoration: underline;
+}
+
+/* ========================================
+   ALERTAS
+   ======================================== */
+
+.alert {
+    padding: 18px 22px; /* Aumentado el padding */
+    border-radius: 12px;
+    margin-bottom: 30px; /* Aumentado de 25px a 30px */
+    font-size: 15px; /* Aumentado de 14px a 15px */
+    line-height: 1.6;
+    border-left: 4px solid;
+    animation: alertSlide 0.4s ease-out;
+}
+
+@keyframes alertSlide {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.alert-danger {
+    background: #fff5f5;
+    color: #c53030;
+    border-color: #fc8181;
+}
+
+.alert-warning {
+    background: #fffaf0;
+    color: #c05621;
+    border-color: #f6ad55;
+}
+
+.alert strong {
+    display: block;
+    margin-bottom: 8px; /* Aumentado de 6px a 8px */
+    font-size: 16px; /* Aumentado de 15px a 16px */
+}
+
+/* ========================================
+   FOOTER DE LA CARD
+   ======================================== */
+
+.card-footer {
+    margin-top: auto;
+    padding-top: 25px; /* Aumentado de 20px a 25px */
+    border-top: 1px solid #e2e8f0;
+    text-align: center;
+}
+
+.card-footer p {
+    color: #718096;
+    font-size: 13px; /* Aumentado de 12px a 13px */
+    line-height: 1.5;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN ACTUALIZADO
+   ======================================== */
+
+@media (max-width: 1100px) { /* Nuevo breakpoint para pantallas más grandes */
+    .login-card {
+        max-width: 95%;
+        min-height: 600px;
+    }
+}
+
+@media (max-width: 968px) {
+    .login-card {
+        flex-direction: column;
+        max-width: 500px;
+        min-height: auto;
+    }
+    
+    .card-left {
+        flex: 0 0 auto;
+        min-height: 350px; /* Aumentado de 300px a 350px */
+        padding: 50px 40px; /* Aumentado el padding */
+    }
+    
+    .academic-icons .icon-item {
+        font-size: 40px; /* Aumentado de 32px a 40px */
+    }
+    
+    .welcome-content h1 {
+        font-size: 52px; /* Aumentado de 42px a 52px */
+    }
+    
+    .welcome-text {
+        font-size: 16px; /* Aumentado de 14px a 16px */
+    }
+    
+    .card-right {
+        padding: 50px 40px; /* Aumentado el padding */
+    }
+    
+    .form-container h2 {
+        font-size: 32px; /* Aumentado de 28px a 32px */
+        margin-bottom: 30px; /* Aumentado de 25px a 30px */
+    }
+}
+
+@media (max-width: 480px) {
+    .login-wrapper {
+        padding: 10px;
+    }
+    
+    .login-card {
+        min-height: auto;
+        border-radius: 16px;
+    }
+    
+    .card-left {
+        padding: 40px 30px; /* Aumentado el padding */
+        min-height: 300px; /* Aumentado de 250px a 300px */
+    }
+    
+    .academic-icons .icon-item {
+        font-size: 36px; /* Aumentado de 28px a 36px */
+    }
+    
+    .welcome-content h1 {
+        font-size: 44px; /* Aumentado de 36px a 44px */
+    }
+    
+    .card-right {
+        padding: 40px 30px; /* Aumentado el padding */
+    }
+    
+    .form-container h2 {
+        font-size: 28px; /* Aumentado de 24px a 28px */
+    }
+    
+    .login-form .form-input {
+        padding: 16px 18px; /* Aumentado el padding */
+        font-size: 15px; /* Aumentado de 14px a 15px */
+    }
+    
+    .btn-login {
+        padding: 16px 20px; /* Aumentado el padding */
+        font-size: 16px; /* Aumentado de 15px a 16px */
+    }
+}
+
+/* ========================================
+   ACCESIBILIDAD
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+.form-input:focus-visible,
+.btn-login:focus-visible,
+.toggle-password:focus-visible {
+    outline: 3px solid #667eea;
+    outline-offset: 2px;
+}
+/* ========================================
+   SISTEMA DE NOTIFICACIONES TOAST MODERNO
+   ======================================== */
+
+.toast-notification {
+    position: fixed;
+    top: 30px;
+    right: 30px;
+    min-width: 350px;
+    max-width: 450px;
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.15),
+        0 0 30px rgba(0, 0, 0, 0.1);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    z-index: 10000;
+    transform: translateX(400px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    border-left: 5px solid;
+    overflow: hidden;
+}
+
+.toast-show {
+    transform: translateX(0);
+    opacity: 1;
+}
+
+.toast-icon {
+    font-size: 22px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.toast-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.toast-title {
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 6px;
+    color: #2d3748;
+    letter-spacing: 0.3px;
+}
+
+.toast-message {
+    font-size: 14px;
+    line-height: 1.5;
+    color: #4a5568;
+    word-wrap: break-word;
+}
+
+.toast-close {
+    background: rgba(0, 0, 0, 0.05);
+    border: none;
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: all 0.2s ease;
+    color: #718096;
+}
+
+.toast-close:hover {
+    background: rgba(0, 0, 0, 0.1);
+    color: #2d3748;
+    transform: scale(1.05);
+}
+
+.toast-progress {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    background: rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+.toast-progress::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    animation: toastProgress 6s linear forwards;
+}
+
+/* Colores para diferentes tipos de toast */
+.toast-success {
+    border-left-color: #10b981;
+    background: linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%);
+}
+
+.toast-success .toast-progress::after {
+    background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.toast-error {
+    border-left-color: #ef4444;
+    background: linear-gradient(135deg, #fef2f2 0%, #ffffff 100%);
+}
+
+.toast-error .toast-progress::after {
+    background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.toast-warning {
+    border-left-color: #f59e0b;
+    background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%);
+}
+
+.toast-warning .toast-progress::after {
+    background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.toast-info {
+    border-left-color: #3b82f6;
+    background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%);
+}
+
+.toast-info .toast-progress::after {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+}
+
+/* Animación de la barra de progreso */
+@keyframes toastProgress {
+    from {
+        transform: translateX(0);
+    }
+    to {
+        transform: translateX(-100%);
+    }
+}
+
+/* Efectos de entrada más dinámicos */
+@keyframes toastSlideIn {
+    0% {
+        transform: translateX(400px) scale(0.8);
+        opacity: 0;
+    }
+    70% {
+        transform: translateX(-20px) scale(1.02);
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.toast-notification {
+    animation: toastSlideIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+/* Efecto de salida */
+.toast-notification.toast-exit {
+    animation: toastSlideOut 0.3s ease-in forwards;
+}
+
+@keyframes toastSlideOut {
+    to {
+        transform: translateX(400px);
+        opacity: 0;
+    }
+}
+
+/* Responsive para toast */
+@media (max-width: 768px) {
+    .toast-notification {
+        min-width: 300px;
+        max-width: calc(100vw - 40px);
+        right: 20px;
+        left: 20px;
+        top: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    .toast-notification {
+        min-width: 280px;
+        padding: 16px;
+    }
+    
+    .toast-icon {
+        font-size: 20px;
+    }
+    
+    .toast-title {
+        font-size: 15px;
+    }
+    
+    .toast-message {
+        font-size: 13px;
+    }
+}
+
+/* ========================================
+   MEJORAS ADICIONALES PARA EL FORMULARIO
+   ======================================== */
+
+/* Mejoras en las validaciones del formulario */
+.form-input:invalid {
+    border-color: #fc8181;
+    background: #fff5f5;
+}
+
+.form-input:valid {
+    border-color: #68d391;
+    background: #f0fff4;
+}
+
+/* Efectos de focus mejorados */
+.form-input:focus {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.15);
+}
+
+/* Loading state para el botón */
+.btn-login.loading {
+    position: relative;
+    color: transparent;
+    pointer-events: none;
+}
+
+.btn-login.loading::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin: -10px 0 0 -10px;
+    border: 2px solid transparent;
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: buttonSpin 0.8s linear infinite;
+}
+
+@keyframes buttonSpin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Mejoras en las partículas */
+.particle {
+    background: rgba(255, 255, 255, 0.8);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+}
+
+/* Efectos hover mejorados para inputs */
+.form-group {
+    position: relative;
+}
+
+.form-group:hover .form-input {
+    border-color: #a0aec0;
+    background: white;
+}
+
+/* Indicador de campo obligatorio */
+.form-group label::after {
+    content: '*';
+    color: #e53e3e;
+    margin-left: 4px;
+}
+
+/* Tooltip para campos */
+.form-input:focus + .field-tooltip {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.field-tooltip {
+    position: absolute;
+    top: -10px;
+    right: 10px;
+    background: #2d3748;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: all 0.3s ease;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+.field-tooltip::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 50%;
+    transform: translateX(-50%);
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid #2d3748;
+}

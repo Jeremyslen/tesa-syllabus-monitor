@@ -1,0 +1,95 @@
+version: '3.8'
+
+services:
+  # Servicio PHP con Apache
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: tesa-syllabus-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+    env_file:
+      - .env
+    environment:
+      # Base de datos
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=tesa_syllabus_monitor
+      - DB_USERNAME=root
+      - DB_PASSWORD=rootpassword
+      
+      # Brightspace OAuth 2.0
+      - OAUTH_CLIENT_ID=${OAUTH_CLIENT_ID}
+      - OAUTH_CLIENT_SECRET=${OAUTH_CLIENT_SECRET}
+      - OAUTH_REDIRECT_URI=${OAUTH_REDIRECT_URI}
+      - OAUTH_AUTH_URL=${OAUTH_AUTH_URL}
+      - OAUTH_TOKEN_URL=${OAUTH_TOKEN_URL}
+      - OAUTH_SCOPE=${OAUTH_SCOPE}
+      
+      # Brightspace API
+      - API_BASE_URL=${API_BASE_URL}
+      - API_VERSION=${API_VERSION}
+      - API_TIMEOUT=${API_TIMEOUT}
+      - API_MAX_RETRIES=${API_MAX_RETRIES}
+      
+      # Aplicación
+      - BASE_URL=${BASE_URL}
+      - DEBUG_MODE=${DEBUG_MODE}
+      - CACHE_ENABLED=${CACHE_ENABLED}
+      - CACHE_DURATION_HOURS=${CACHE_DURATION_HOURS}
+      - CACHE_AUTO_UPDATE=${CACHE_AUTO_UPDATE}
+      - LOG_ENABLED=${LOG_ENABLED}
+      - LOG_LEVEL=${LOG_LEVEL}
+    depends_on:
+      - db
+    networks:
+      - tesa-network
+    restart: unless-stopped
+
+  # Servicio MySQL
+  db:
+    image: mysql:8.0
+    container_name: tesa-syllabus-db
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: tesa_syllabus_monitor
+      MYSQL_USER: tesa_user
+      MYSQL_PASSWORD: tesa_password
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - tesa-network
+    restart: unless-stopped
+    command: --default-authentication-plugin=mysql_native_password
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: tesa-syllabus-phpmyadmin
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      UPLOAD_LIMIT: 100M
+    depends_on:
+      - db
+    networks:
+      - tesa-network
+    restart: unless-stopped
+
+networks:
+  tesa-network:
+    driver: bridge
+
+volumes:
+  mysql-data:
+    driver: local
