@@ -1,19 +1,13 @@
 <?php
 /**
  * TESA Syllabus Monitor
- * Archivo de Configuración Principal - VERSIÓN SEGURA PARA PRODUCCIÓN
- * 
- * IMPORTANTE: No contiene credenciales hardcodeadas
- * Todas las configuraciones sensibles vienen de variables de entorno
+ * Archivo de Configuración Principal - 
  */
 
 // Prevenir acceso directo
 define('APP_ACCESS', true);
 
-// ==========================================
-// CARGAR VARIABLES DE ENTORNO DESDE .env
-// ==========================================
-// Solo para desarrollo local - Azure usa variables de entorno nativas
+
 if (file_exists(__DIR__ . '/../.env')) {
     $lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
     foreach ($lines as $line) {

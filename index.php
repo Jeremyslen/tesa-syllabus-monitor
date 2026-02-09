@@ -14,13 +14,13 @@ require_once INCLUDES_PATH . '/auth.php';
 require_once INCLUDES_PATH . '/functions.php';
 require_once INCLUDES_PATH . '/oauth_handler.php';
 
-// ✨ PROTECCIÓN: Requiere autenticación
+
 Auth::requireAuth();
 
-// Obtener datos del usuario actual
+
 $usuario = Auth::getCurrentUser();
 
-// Verificar configuración del sistema
+
 $config_check = verificarConfiguracion();
 ?>
 <!DOCTYPE html>
@@ -60,7 +60,7 @@ $config_check = verificarConfiguracion();
             </div>
         </div>
         
-        <!-- ✨ NUEVO: Información de Usuario -->
+        
         <div class="user-menu">
             <div class="user-info">
                 <span class="user-icon"><?php echo $usuario['is_admin'] ? '👨‍💼' : '👤'; ?></span>

@@ -47,7 +47,7 @@ class OAuthHandler {
     }
     
     /**
-     * Obtener Access Token válido (desde BD o generando uno nuevo)
+     * Obtener Access Token válido 
      * 
      * @param bool $force_refresh Forzar renovación aunque parezca válido
      * @return string Access Token
@@ -81,7 +81,7 @@ class OAuthHandler {
             }
         }
         
-        // Si llegamos aquí, necesitamos un nuevo token
+        
         logMessage("No hay token válido. Se requiere autenticación manual.", 'ERROR');
         throw new Exception("No hay Access Token válido. Por favor, autentique la aplicación manualmente.");
     }
