@@ -302,7 +302,8 @@
         $tbody.empty();
 
         clases.forEach(clase => {
-            const syllabusClass = clase.tiene_syllabus === 'SI' ? 'badge-success' : 'badge-danger';
+            const syllabusClass       = clase.tiene_syllabus       === 'SI' ? 'badge-success' : 'badge-danger';
+            const bienvenidaClass     = clase.tiene_bienvenida     === 'SI' ? 'badge-success' : 'badge-danger';
             
             // Lógica de colores para calificación
             let calificacionColor;
@@ -320,21 +321,24 @@
             }
             
             const row = `
-                <tr>
-                    <td class="col-nrc">${clase.nrc}</td>
-                    <td class="col-nombre" title="${clase.nombre}">${clase.nombre_corto}</td>
-                    <td class="col-syllabus">
-                        <span class="badge ${syllabusClass}">${clase.tiene_syllabus}</span>
-                    </td>
-                    <td class="col-calificacion" style="color: ${calificacionColor}; font-weight: bold;">
-                        ${calificacionIcon} ${clase.calificacion_final.toFixed(2)}
-                    </td>
-                    <td class="col-documentos">
-                        <span class="badge badge-info">${clase.total_documentos}</span>
-                    </td>
-                </tr>
-            `;
-            
+            <tr>
+                <td class="col-nrc">${clase.nrc}</td>
+                <td class="col-nombre" title="${clase.nombre}">${clase.nombre_corto}</td>
+                <td class="col-bienvenida">
+                    <span class="badge ${bienvenidaClass}">${clase.tiene_bienvenida ?? 'NO'}</span>
+                </td>
+                <td class="col-syllabus">
+                    <span class="badge ${syllabusClass}">${clase.tiene_syllabus}</span>
+                </td>
+                <td class="col-calificacion" style="color: ${calificacionColor}; font-weight: bold;">
+                    ${calificacionIcon} ${clase.calificacion_final.toFixed(2)}
+                </td>
+                <td class="col-documentos">
+                    <span class="badge badge-info">${clase.total_documentos}</span>
+                </td>
+            </tr>
+        `;
+                    
             $tbody.append(row);
         });
 

@@ -21,33 +21,28 @@ class CacheManager {
     }
     
 
+    // =========================================================================
     // GESTIÓN DE PERÍODOS
+    // =========================================================================
 
-    
-    /**
-     * Obtener o crear período en la base de datos
-     */
     public function guardarPeriodo($periodo_data) {
         try {
             $org_unit_id = intval($periodo_data['Identifier']);
             $codigo = trim($periodo_data['Code']);
             $nombre = trim($periodo_data['Name']);
             
-            // Verificar si ya existe el período
             $existente = $this->db->fetchOne(
                 "SELECT id FROM periodos WHERE org_unit_id = ? LIMIT 1",
                 [$org_unit_id]
             );
             
             if ($existente) {
-                // Actualizar período existente
                 $this->db->update(
                     "UPDATE periodos SET codigo = ?, nombre = ?, fecha_actualizacion = NOW() WHERE id = ?",
                     [$codigo, $nombre, $existente['id']]
                 );
                 return (int)$existente['id'];
             } else {
-                // Insertar nuevo período
                 return $this->db->insert(
                     "INSERT INTO periodos (org_unit_id, codigo, nombre, activo) VALUES (?, ?, ?, 1)",
                     [$org_unit_id, $codigo, $nombre]
@@ -60,17 +55,12 @@ class CacheManager {
         }
     }
     
-   
+
+    // =========================================================================
     // FILTRADO DE GRUPOS DE TRABAJO
-   
+    // =========================================================================
     
-    /**
-     * Verificar si una clase es un grupo de trabajo que debe ser ignorado
-     */
     private function esGrupoDeTrabajo($nombre) {
-        $nombre_lower = strtolower(trim($nombre));
-        
-        // Patrones para identificar grupos de trabajo
         $patrones_grupos = [
             '/^group\s+\d+$/i',
             '/^grupo\s+\d+$/i',
@@ -103,23 +93,21 @@ class CacheManager {
         return false;
     }
     
- 
-    // GESTIÓN DE CLASES
 
-    /**
-     * Guardar o actualizar clase en la base de datos
-     */
+    // =========================================================================
+    // GESTIÓN DE CLASES
+    // =========================================================================
+
     public function guardarClase($clase_data, $periodo_id) {
         try {
             if (!isset($clase_data['Identifier']) || !isset($clase_data['Name']) || !isset($clase_data['Code'])) {
                 throw new Exception("Datos de clase incompletos");
             }
             
-            $org_unit_id = intval($clase_data['Identifier']);
+            $org_unit_id  = intval($clase_data['Identifier']);
             $codigo_clase = trim($clase_data['Code']);
-            $nombre_api = trim($clase_data['Name']);
+            $nombre_api   = trim($clase_data['Name']);
             
-            // Construir nombre completo consistente
             if (strpos($nombre_api, ' - ') !== false) {
                 $nombre_completo = $nombre_api;
             } else {
@@ -132,19 +120,16 @@ class CacheManager {
             
             logMessage("📝 Procesando clase: API='$nombre_api' | Code='$codigo_clase' | Final='$nombre_completo'", 'DEBUG');
             
-            // Extraer información de la clase
-            $nrc = extraerNRC($nombre_completo);
+            $nrc            = extraerNRC($nombre_completo);
             $codigo_carrera = extraerCodigoCarrera($nombre_completo);
-            $carrera_id = $codigo_carrera ? obtenerIdCarrera($codigo_carrera) : null;
+            $carrera_id     = $codigo_carrera ? obtenerIdCarrera($codigo_carrera) : null;
             
-            // Verificar si ya existe la clase
             $existente = $this->db->fetchOne(
                 "SELECT id FROM clases WHERE org_unit_id = ? LIMIT 1",
                 [$org_unit_id]
             );
             
             if ($existente) {
-                // Actualizar clase existente
                 $this->db->update(
                     "UPDATE clases SET 
                         periodo_id = ?, 
@@ -159,7 +144,6 @@ class CacheManager {
                 logMessage("✅ Clase actualizada: $nombre_completo (ID: {$existente['id']})", 'DEBUG');
                 return (int)$existente['id'];
             } else {
-                // Insertar nueva clase
                 $clase_id = $this->db->insert(
                     "INSERT INTO clases (
                         org_unit_id, periodo_id, carrera_id, nrc, nombre_completo, codigo_clase
@@ -177,20 +161,19 @@ class CacheManager {
     }
     
 
-    // SINCRONIZACIÓN SECUENCIAL 
+    // =========================================================================
+    // SINCRONIZACIÓN SECUENCIAL
+    // =========================================================================
     
-    /**
-     * Sincronizar todas las clases de un período - PROCESAMIENTO SECUENCIAL 1x1
-     */
     public function sincronizarClasesPeriodo($periodo_id, $org_unit_id, $forzar_actualizacion = false, $carrera_codigo = null) {
         $inicio = microtime(true);
         $resultado = [
-            'total' => 0,
-            'nuevas' => 0,
+            'total'        => 0,
+            'nuevas'       => 0,
             'actualizadas' => 0,
-            'errores' => 0,
-            'ignoradas' => 0,
-            'duracion' => 0
+            'errores'      => 0,
+            'ignoradas'    => 0,
+            'duracion'     => 0
         ];
         
         try {
@@ -199,7 +182,7 @@ class CacheManager {
             
             // PASO 1: Obtener clases desde el API
             $clases_api = $this->api->getClasesPorPeriodo($org_unit_id);
-            $total_api = count($clases_api);
+            $total_api  = count($clases_api);
             logMessage("📥 Clases obtenidas del API: $total_api", 'INFO');
             
             if ($total_api === 0) {
@@ -207,35 +190,28 @@ class CacheManager {
                 return $resultado;
             }
             
-            // 🆕 NUEVO: Filtrar por carrera si se especificó
+            // Filtrar por carrera si se especificó
             if ($carrera_codigo) {
                 $clases_api = array_filter($clases_api, function($clase) use ($carrera_codigo) {
                     $nombre = $clase['Name'] ?? '';
                     $codigo = $clase['Code'] ?? '';
-                    
-                    // Buscar patrón como: "25.S3.ADM4010" o "25.S3.ADM-4001"
                     $patron = '/\.' . preg_quote($carrera_codigo, '/') . '[-\d]/i';
-                    
                     return preg_match($patron, $nombre) || preg_match($patron, $codigo);
                 });
                 
-                // Re-indexar array después del filtro
                 $clases_api = array_values($clases_api);
+                $total_api  = count($clases_api);
                 
-                $total_filtradas = count($clases_api);
-                logMessage("🔍 Clases filtradas por carrera $carrera_codigo: $total_filtradas de $total_api", 'INFO');
+                logMessage("🔍 Clases filtradas por carrera $carrera_codigo: $total_api", 'INFO');
                 
-                if ($total_filtradas === 0) {
+                if ($total_api === 0) {
                     logMessage("⚠️ No se encontraron clases para la carrera $carrera_codigo", 'WARNING');
                     return $resultado;
                 }
-                
-                // Actualizar el total para los cálculos de progreso
-                $total_api = $total_filtradas;
             }
             
             // PASO 2: Procesar cada clase SECUENCIALMENTE
-            $clases_procesadas = 0;
+            $clases_procesadas         = 0;
             $clases_actualizadas_count = 0;
             
             foreach ($clases_api as $clase_data) {
@@ -245,7 +221,7 @@ class CacheManager {
                         continue;
                     }
                     
-                    $nombre = $clase_data['Name'] ?? 'DESCONOCIDA';
+                    $nombre         = $clase_data['Name'] ?? 'DESCONOCIDA';
                     $org_unit_clase = intval($clase_data['Identifier']);
                     
                     // Filtrar grupos de trabajo
@@ -271,29 +247,36 @@ class CacheManager {
                         
                         if ($clase_info) {
                             $necesita_actualizacion = ($clase_info['tiene_syllabus'] === 'PENDIENTE') || 
-                                                     cacheVencido($clase_info['fecha_actualizacion']);
+                                                      cacheVencido($clase_info['fecha_actualizacion']);
                         }
                     }
                     
                     // Actualizar datos completos si es necesario
                     if ($necesita_actualizacion) {
-                        // Obtener datos completos del API
                         $datos = $this->api->getDatosCompletosClase($org_unit_clase, $nombre);
                         
-                        // Convertir a tipos correctos
-                        $calificacion = (float)$datos['calificacion_final'];
-                        $tiene_syllabus = $datos['tiene_syllabus'];
-                        $total_docs = (int)$datos['total_documentos'];
-                        
-                        // Actualizar en BD
+                        // Extraer valores con defaults seguros
+                        $tiene_syllabus   = $datos['tiene_syllabus']           ?? 'NO';
+                        $calificacion     = (float)($datos['calificacion_final'] ?? 0.0);
+                        $total_docs       = (int)($datos['total_documentos']     ?? 0);
+                        $tiene_bienvenida = $datos['tiene_bienvenida']         ?? 'NO';
+
+                        // ✅ 4 campos = 4 ? + 1 WHERE = 5 valores en el array
                         $filas_afectadas = $this->db->update(
                             "UPDATE clases SET 
-                                tiene_syllabus = ?,
-                                calificacion_final = ?,
-                                total_documentos = ?,
+                                tiene_syllabus      = ?,
+                                calificacion_final  = ?,
+                                total_documentos    = ?,
+                                tiene_bienvenida    = ?,
                                 fecha_actualizacion = NOW()
                             WHERE id = ?",
-                            [$tiene_syllabus, $calificacion, $total_docs, $clase_id]
+                            [
+                                $tiene_syllabus,
+                                $calificacion,
+                                $total_docs,
+                                $tiene_bienvenida,
+                                $clase_id
+                            ]
                         );
                         
                         if ($filas_afectadas > 0) {
@@ -303,17 +286,13 @@ class CacheManager {
                     
                     $clases_procesadas++;
                     
-                   
                     if ($clases_procesadas % 20 === 0) {
                         $porcentaje = round(($clases_procesadas / $total_api) * 100);
                         logMessage("Progreso: {$clases_procesadas}/{$total_api} ({$porcentaje}%)", 'INFO');
-                        
-                        
                         gc_collect_cycles();
                     }
                     
-            
-                    usleep(30000); // 30ms
+                    usleep(30000); // 30ms entre peticiones
                     
                 } catch (Exception $e) {
                     $resultado['errores']++;
@@ -323,8 +302,8 @@ class CacheManager {
             
             // PASO 3: Finalizar proceso
             $resultado['actualizadas'] = $clases_actualizadas_count;
-            $resultado['nuevas'] = $resultado['total'] - $resultado['actualizadas'];
-            $resultado['duracion'] = round(microtime(true) - $inicio, 2);
+            $resultado['nuevas']       = $resultado['total'] - $resultado['actualizadas'];
+            $resultado['duracion']     = round(microtime(true) - $inicio, 2);
             
             setConfig('ultima_sincronizacion', date('Y-m-d H:i:s'));
             
@@ -347,18 +326,24 @@ class CacheManager {
     }
     
 
+    // =========================================================================
     // CONSULTAS DE CACHE
+    // =========================================================================
     
-    /**
-     * Obtener clases desde cache con filtros
-     */
     public function obtenerClasesDesdeCache($periodo_id, $carrera_codigo = null) {
         try {
             $sql = "SELECT 
-                        c.id, c.org_unit_id, c.nrc, c.nombre_completo,
-                        c.tiene_syllabus, c.calificacion_final, c.total_documentos,
-                        c.fecha_actualizacion, car.codigo as carrera_codigo,
-                        car.nombre as carrera_nombre
+                        c.id,
+                        c.org_unit_id,
+                        c.nrc,
+                        c.nombre_completo,
+                        c.tiene_syllabus,
+                        c.calificacion_final,
+                        c.total_documentos,
+                        c.tiene_bienvenida,
+                        c.fecha_actualizacion,
+                        car.codigo AS carrera_codigo,
+                        car.nombre AS carrera_nombre
                     FROM clases c
                     LEFT JOIN carreras car ON c.carrera_id = car.id
                     WHERE c.periodo_id = ?";
@@ -380,9 +365,6 @@ class CacheManager {
         }
     }
     
-    /**
-     * Obtener el ID interno del período por su org_unit_id
-     */
     public function obtenerIdPeriodoPorOrgUnit($org_unit_id) {
         try {
             $periodo = $this->db->fetchOne(
@@ -399,11 +381,10 @@ class CacheManager {
     }
     
 
+    // =========================================================================
     // MANTENIMIENTO
+    // =========================================================================
 
-    /**
-     * Limpiar cache antiguo (más de X horas)
-     */
     public function limpiarCacheAntiguo($horas = 24) {
         try {
             $fecha_limite = date('Y-m-d H:i:s', strtotime("-$horas hours"));
@@ -432,9 +413,6 @@ class CacheManager {
         }
     }
     
-    /**
-     * Registrar log de sincronización
-     */
     private function registrarLogSincronizacion($tipo, $periodo_id, $resultado, $errores = null) {
         try {
             $this->db->insert(

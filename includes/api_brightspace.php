@@ -30,7 +30,9 @@ class ApiBrightspace {
         }
     }
     
+    // =========================================================================
     // MANEJO DE PETICIONES HTTP
+    // =========================================================================
 
     /**
      * Realizar petición GET a la API con soporte para paginación y reintentos
@@ -126,7 +128,9 @@ class ApiBrightspace {
     }
     
 
+    // =========================================================================
     // CONSULTAS PRINCIPALES - PERÍODOS Y CLASES
+    // =========================================================================
     
     /**
      * Obtener todos los períodos/semestres
@@ -173,7 +177,6 @@ class ApiBrightspace {
                     break;
                 }
                 
-                // Continuar paginación si hay más resultados
                 if ($paging_info && $paging_info['has_more'] && $paging_info['bookmark']) {
                     $bookmark = $paging_info['bookmark'];
                     $page++;
@@ -181,7 +184,6 @@ class ApiBrightspace {
                     $bookmark = null;
                 }
                 
-                // Límite de seguridad
                 if ($page > 100) {
                     logMessage("Límite de 100 páginas alcanzado", 'WARNING');
                     break;
@@ -199,7 +201,9 @@ class ApiBrightspace {
     }
     
     
+    // =========================================================================
     // CONSULTAS DE CONTENIDO Y CALIFICACIONES
+    // =========================================================================
     
     /**
      * Obtener contenido/archivos de una clase
@@ -210,7 +214,6 @@ class ApiBrightspace {
             $result = $this->makeRequest($endpoint);
             $data = $result['data'];
             
-            // Contar documentos en el contenido
             $total_docs = 0;
             if (isset($data['Modules'])) {
                 foreach ($data['Modules'] as $module) {
@@ -269,8 +272,39 @@ class ApiBrightspace {
             return [];
         }
     }
-    
+
+    /**
+     * Verificar si existe un anuncio de Bienvenida en la clase
+     */
+    public function getTieneBienvenida($orgUnitId) {
+        try {
+            $endpoint = '/d2l/api/le/1.43/' . $orgUnitId . '/news/';
+            $result = $this->makeRequest($endpoint);
+            $noticias = $result['data'];
+            
+            if (empty($noticias)) {
+                return 'NO';
+            }
+            
+            foreach ($noticias as $noticia) {   
+                $titulo = $noticia['Title'] ?? '';
+                if (stripos($titulo, 'bienvenida') !== false || stripos($titulo, 'bienvenidos') !== false) {
+                    return 'SI';
+                }
+            }
+            
+            return 'NO';
+            
+        } catch (Exception $e) {
+            $nivel = (strpos($e->getMessage(), 'Acceso denegado') !== false) ? 'DEBUG' : 'WARNING';
+            logMessage("Error al obtener announcements de $orgUnitId: " . $e->getMessage(), $nivel);
+            return 'NO';
+        }
+    }
+        
+    // =========================================================================
     // PROCESAMIENTO DE DATOS
+    // =========================================================================
     
     /**
      * Procesar contenido para detectar Syllabus y contar documentos
@@ -284,12 +318,10 @@ class ApiBrightspace {
         }
         
         foreach ($contenido['Modules'] as $module) {
-            // Buscar syllabus en títulos de módulos
             if (stripos($module['Title'], 'syllabus') !== false) {
                 $tiene_syllabus = 'SI';
             }
             
-            // Contar documentos y buscar syllabus en topics
             if (isset($module['Topics']) && is_array($module['Topics'])) {
                 foreach ($module['Topics'] as $topic) {
                     if ($topic['TypeIdentifier'] === 'File') {
@@ -308,7 +340,6 @@ class ApiBrightspace {
         ];
     }
     
-
     public function calcularCalificacionFinal($calificaciones, $categorias = []) {
         $total = 0.0;
         
@@ -318,7 +349,6 @@ class ApiBrightspace {
         
         logMessage("Calculando calificación final de " . count($calificaciones) . " items", 'DEBUG');
         
-        // Crear mapa de categorías excluidas
         $categorias_excluidas = [];
         if (!empty($categorias)) {
             foreach ($categorias as $cat) {
@@ -329,21 +359,18 @@ class ApiBrightspace {
             }
         }
         
-        // Sumar solo items válidos
         foreach ($calificaciones as $item) {
             $nombre = $item['Name'] ?? '';
             $max_points = floatval($item['MaxPoints'] ?? 0);
             $category_id = $item['CategoryId'] ?? null;
             $grade_type = $item['GradeType'] ?? 'Numeric';
             
-            // Criterios de exclusión
             $es_categoria_calculada = ($grade_type === 'Calculated');
             $es_categoria_sin_puntos = ($max_points == 0);
             $es_bonus = ($item['IsBonus'] ?? false) === true;
             $item_excluido = ($item['ExcludeFromFinalGradeCalculation'] ?? false) === true;
             $categoria_excluida = $category_id && in_array($category_id, $categorias_excluidas);
             
-            // INCLUIR el item SOLO si cumple TODOS estos criterios
             $incluir = !$es_categoria_calculada 
                     && !$es_categoria_sin_puntos
                     && !$item_excluido
@@ -370,25 +397,28 @@ class ApiBrightspace {
         return round($total, 2);
     }
 
+    // =========================================================================
     // OBTENCIÓN DE DATOS COMPLETOS DE UNA CLASE
+    // =========================================================================
 
     public function getDatosCompletosClase($orgUnitId, $nombre_clase = '') {
         try {
             $resultado = [
-                'org_unit_id' => $orgUnitId,
-                'tiene_syllabus' => 'PENDIENTE',
-                'calificacion_final' => 0.0,
-                'total_documentos' => 0,
-                'error' => null
+                'org_unit_id'          => $orgUnitId,
+                'tiene_syllabus'       => 'PENDIENTE',
+                'calificacion_final'   => 0.0,
+                'total_documentos'     => 0,
+                'tiene_bienvenida'     => 'NO',
+                'error'                => null
             ];
             
             $es_grupo = preg_match('/^(group|grupo|team|equipo)\s+\d+$/i', trim($nombre_clase));
             
-            // Obtener y procesar contenido
+            // 1. Obtener y procesar contenido
             try {
                 $contenido = $this->getContenido($orgUnitId);
                 $datos_contenido = $this->procesarContenido($contenido);
-                $resultado['tiene_syllabus'] = $datos_contenido['tiene_syllabus'];
+                $resultado['tiene_syllabus']   = $datos_contenido['tiene_syllabus'];
                 $resultado['total_documentos'] = $datos_contenido['total_documentos'];
             } catch (Exception $e) {
                 if ($es_grupo && strpos($e->getMessage(), 'Acceso denegado') !== false) {
@@ -399,23 +429,30 @@ class ApiBrightspace {
                 $resultado['error'] = 'Error en contenido';
             }
             
-            // 🔧 FIX CRÍTICO: Obtener calificaciones Y categorías
+            // 2. Obtener calificaciones y categorías
             try {
                 $calificaciones = $this->getCalificaciones($orgUnitId);
-                $categorias = $this->getCategoriasCalificaciones($orgUnitId);
-                
-                // ✅ Pasar ambos parámetros a la función
+                $categorias     = $this->getCategoriasCalificaciones($orgUnitId);
                 $resultado['calificacion_final'] = $this->calcularCalificacionFinal($calificaciones, $categorias);
-                
                 logMessage("🎯 Calificación calculada para $orgUnitId: {$resultado['calificacion_final']}", 'DEBUG');
-                
             } catch (Exception $e) {
                 if ($es_grupo && strpos($e->getMessage(), 'Acceso denegado') !== false) {
                     logMessage("Grupo de trabajo sin calificaciones: $nombre_clase (ID: $orgUnitId)", 'DEBUG');
                 } else {
                     logMessage("⚠️ Error al procesar calificaciones de $orgUnitId: " . $e->getMessage(), 'WARNING');
                 }
-                $resultado['error'] = $resultado['error'] ? $resultado['error'] . ', Error en calificaciones' : 'Error en calificaciones';
+                $resultado['error'] = $resultado['error'] 
+                    ? $resultado['error'] . ', Error en calificaciones' 
+                    : 'Error en calificaciones';
+            }
+
+            // 3. Verificar anuncio de bienvenida
+            try {
+                $resultado['tiene_bienvenida'] = $this->getTieneBienvenida($orgUnitId);
+                logMessage("📢 Bienvenida en $orgUnitId: {$resultado['tiene_bienvenida']}", 'DEBUG');
+            } catch (Exception $e) {
+                logMessage("⚠️ Error al verificar bienvenida de $orgUnitId: " . $e->getMessage(), 'WARNING');
+                $resultado['tiene_bienvenida'] = 'NO';
             }
             
             return $resultado;
@@ -425,4 +462,5 @@ class ApiBrightspace {
             throw $e;
         }
     }
+    
 }

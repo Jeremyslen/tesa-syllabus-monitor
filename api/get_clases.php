@@ -56,7 +56,6 @@ try {
             $api = new ApiBrightspace();
             $periodos_api = $api->getPeriodos();
             
-           
             $periodo_data = null;
             foreach ($periodos_api as $p) {
                 if (isset($p['Identifier']) && $p['Identifier'] == $org_unit_id) {
@@ -69,7 +68,6 @@ try {
                 respuestaJSON(false, null, "Período con org_unit_id=$org_unit_id no encontrado en Brightspace", 404);
             }
             
-          
             $cache_manager = new CacheManager();
             $periodo_db_id = $cache_manager->guardarPeriodo($periodo_data);
             
@@ -80,7 +78,6 @@ try {
             respuestaJSON(false, null, 'Error al crear período: ' . $e->getMessage(), 500);
         }
     } else {
-        // El período ya existe
         $periodo_db_id = intval($periodo['id']);
         logMessage("✅ Período encontrado en BD: ID=$periodo_db_id (org_unit_id=$org_unit_id)", 'INFO');
     }
@@ -92,7 +89,6 @@ try {
         try {
             $clases_cache = $cache_manager->obtenerClasesDesdeCache($periodo_db_id, $carrera_codigo);
             
-            // Verificar si el cache está actualizado
             if (!empty($clases_cache)) {
                 $primera_clase = $clases_cache[0];
                 $cache_actualizado = !cacheVencido($primera_clase['fecha_actualizacion']);
@@ -100,31 +96,32 @@ try {
                 if ($cache_actualizado) {
                     logMessage("📦 Usando datos desde cache (" . count($clases_cache) . " clases)", 'INFO');
                     
-                    // Formatear datos para respuesta
+                    // ── BLOQUE CACHE: formatear datos para respuesta ──
                     foreach ($clases_cache as $clase) {
                         $clases[] = [
-                            'id' => (int)$clase['id'],
-                            'nrc' => $clase['nrc'],
-                            'nombre' => $clase['nombre_completo'],
-                            'nombre_corto' => limpiarNombreClase($clase['nombre_completo']),
-                            'tiene_syllabus' => $clase['tiene_syllabus'],
-                            'calificacion_final' => (float)$clase['calificacion_final'],
-                            'total_documentos' => (int)$clase['total_documentos'],
-                            'carrera_codigo' => $clase['carrera_codigo'],
-                            'carrera_nombre' => $clase['carrera_nombre'],
+                            'id'                => (int)$clase['id'],
+                            'nrc'               => $clase['nrc'],
+                            'nombre'            => $clase['nombre_completo'],
+                            'nombre_corto'      => limpiarNombreClase($clase['nombre_completo']),
+                            'tiene_syllabus'    => $clase['tiene_syllabus'],
+                            'tiene_bienvenida'  => $clase['tiene_bienvenida'] ?? 'NO',  // ← NUEVO
+                            'calificacion_final'=> (float)$clase['calificacion_final'],
+                            'total_documentos'  => (int)$clase['total_documentos'],
+                            'carrera_codigo'    => $clase['carrera_codigo'],
+                            'carrera_nombre'    => $clase['carrera_nombre'],
                             'ultima_actualizacion' => $clase['fecha_actualizacion'],
-                            'desde_cache' => true
+                            'desde_cache'       => true
                         ];
                     }
                     
                     respuestaJSON(true, [
                         'clases' => $clases,
                         'sincronizacion' => [
-                            'total' => count($clases),
-                            'nuevas' => 0,
+                            'total'        => count($clases),
+                            'nuevas'       => 0,
                             'actualizadas' => 0,
-                            'errores' => 0,
-                            'desde_cache' => true
+                            'errores'      => 0,
+                            'desde_cache'  => true
                         ]
                     ], 'Clases obtenidas desde cache');
                 }
@@ -138,28 +135,28 @@ try {
     logMessage("🔄 Sincronizando datos desde API x1 Brightspace...", 'INFO');
     
     $resultado_sync = $cache_manager->sincronizarClasesPeriodo(
-        $periodo_db_id,    
-        $org_unit_id,      
-        !$usar_cache      
+        $periodo_db_id,
+        $org_unit_id,
+        !$usar_cache
     );
-    
     
     $clases_actualizadas = $cache_manager->obtenerClasesDesdeCache($periodo_db_id, $carrera_codigo);
     
-    // Formatear datos para respuesta
+    // ── BLOQUE API: formatear datos para respuesta ──
     foreach ($clases_actualizadas as $clase) {
         $clases[] = [
-            'id' => (int)$clase['id'],
-            'nrc' => $clase['nrc'],
-            'nombre' => $clase['nombre_completo'],
-            'nombre_corto' => limpiarNombreClase($clase['nombre_completo']),
-            'tiene_syllabus' => $clase['tiene_syllabus'],
-            'calificacion_final' => (float)$clase['calificacion_final'],
-            'total_documentos' => (int)$clase['total_documentos'],
-            'carrera_codigo' => $clase['carrera_codigo'],
-            'carrera_nombre' => $clase['carrera_nombre'],
+            'id'                => (int)$clase['id'],
+            'nrc'               => $clase['nrc'],
+            'nombre'            => $clase['nombre_completo'],
+            'nombre_corto'      => limpiarNombreClase($clase['nombre_completo']),
+            'tiene_syllabus'    => $clase['tiene_syllabus'],
+            'tiene_bienvenida'  => $clase['tiene_bienvenida'] ?? 'NO',  // ← NUEVO
+            'calificacion_final'=> (float)$clase['calificacion_final'],
+            'total_documentos'  => (int)$clase['total_documentos'],
+            'carrera_codigo'    => $clase['carrera_codigo'],
+            'carrera_nombre'    => $clase['carrera_nombre'],
             'ultima_actualizacion' => $clase['fecha_actualizacion'],
-            'desde_cache' => false
+            'desde_cache'       => false
         ];
     }
     

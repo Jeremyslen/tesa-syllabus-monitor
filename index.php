@@ -171,6 +171,7 @@ $config_check = verificarConfiguracion();
                         <tr>
                             <th>NRC</th>
                             <th>Nombre de la Clase</th>
+                            <th>Bienvenida</th>
                             <th>Syllabus</th>
                             <th>Calificación Final</th>
                             <th>Documentos</th>
