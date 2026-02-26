@@ -148,7 +148,6 @@ $(document).ready(function() {
     $('#btn-toggle-log').click(toggleLog);
     $('#form-usuario').submit(guardarUsuario);
     $('#form-password').submit(cambiarPassword);
-    $('#nombre-completo').on('input', generarCorreoPreview);
     $('#btn-copiar-correo').click(() => copiarTexto('correo-generado'));
     $('#btn-copiar-password').click(() => copiarTexto('password-generada'));
     $('#btn-regenerar-password').click(regenerarPassword);
@@ -376,23 +375,19 @@ function regenerarPassword() {
 function guardarUsuario(e) {
     e.preventDefault();
     
-    console.log('💾 Guardando usuario...');
-    
     const nombreCompleto = $('#nombre-completo').val().trim();
     const rol = $('#rol').val();
-    const correo = generarCorreoDesdeNombre(nombreCompleto);
+    const correo = $('#correo-input').val().trim();
     const password = generarPassword();
     
     if (!correo) {
-        mostrarError('No se pudo generar el correo. Verifica el nombre.');
+        mostrarError('El correo es requerido.');
         return;
     }
     
-    // Mostrar contraseña generada
     $('#password-generada').val(password);
     $('#password-section').slideDown(300);
     
-    // Deshabilitar botón mientras se guarda
     const $btnGuardar = $('#btn-guardar-usuario');
     $btnGuardar.prop('disabled', true).text('⏳ Guardando...');
     
@@ -409,13 +404,10 @@ function guardarUsuario(e) {
             rol: rol
         },
         success: function(response) {
-            console.log('✅ Respuesta:', response);
             ocultarCargandoGlobal();
             
             if (response.success) {
                 mostrarExito(`Usuario creado exitosamente. Correo: ${correo}`);
-                
-                // NO cerrar el modal inmediatamente, dejar que vea la contraseña
                 setTimeout(() => {
                     cerrarModal();
                     cargarUsuarios();
@@ -426,7 +418,6 @@ function guardarUsuario(e) {
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Error AJAX:', error);
             ocultarCargandoGlobal();
             mostrarError('Error de conexión al crear usuario');
             $btnGuardar.prop('disabled', false).text('✅ Guardar Usuario');

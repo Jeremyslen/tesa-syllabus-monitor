@@ -211,15 +211,18 @@ $usuario = Auth::getCurrentUser();
                     </div>
 
                     <div class="form-group">
-                        <label>
-                            ✉️ Correo Generado
+                        <label for="correo-input">
+                            ✉️ Correo *
                         </label>
-                        <div id="correo-preview" class="correo-preview">
-                            <span id="correo-generado">-</span>
-                            <button type="button" id="btn-copiar-correo" class="btn-icon" title="Copiar correo">
-                                📋
-                            </button>
-                        </div>
+                        <input 
+                            type="text" 
+                            id="correo-input" 
+                            name="correo" 
+                            class="form-control" 
+                            placeholder="Ej: privera@tesa.edu.ec"
+                            required
+                        >
+                        <small class="form-text">Debe terminar en @tesa.edu.ec</small>
                     </div>
 
                     <div class="form-group">
