@@ -47,12 +47,6 @@ try {
         ], 400);
     }
     
-    if (!str_ends_with(strtolower($correo), '@tesa.edu.ec')) {
-        jsonResponse([
-            'success' => false,
-            'message' => 'El correo debe ser del dominio @tesa.edu.ec'
-        ], 400);
-    }
     
     if (empty($password) || strlen($password) < 8) {
         jsonResponse([
